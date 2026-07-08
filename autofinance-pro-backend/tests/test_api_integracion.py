@@ -115,3 +115,12 @@ def test_flujo_completo_simular_y_registrar_credito(client: TestClient):
     resp_pdf = client.get(f"/api/v1/reportes/creditos/{id_credito}/resumen.pdf", headers=headers)
     assert resp_pdf.status_code == 200
     assert resp_pdf.headers["content-type"] == "application/pdf"
+
+    # GET /creditos (listado) -- alimenta los KPIs del Dashboard del frontend
+    resp_listado = client.get("/api/v1/creditos", headers=headers)
+    assert resp_listado.status_code == 200, resp_listado.text
+    listado = resp_listado.json()
+    assert isinstance(listado, list)
+    assert len(listado) == 1
+    assert listado[0]["id_credito"] == id_credito
+    assert listado[0]["monto_financiado"] == pytest.approx(68000, abs=0.01)
