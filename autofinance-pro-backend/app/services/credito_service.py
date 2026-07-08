@@ -99,6 +99,12 @@ class CreditoService:
             indicadores=resultado_simulacion.indicadores,
         )
 
+    def listar_creditos(self) -> list[CreditoOut]:
+        if self.repo is None:
+            raise RuntimeError("CreditoService requiere un CreditoRepository para listar")
+        creditos_db = self.repo.listar(limit=500)
+        return [CreditoOut.model_validate(c) for c in creditos_db]
+
     def obtener_detalle(self, id_credito: int) -> CreditoDetalle | None:
         if self.repo is None:
             raise RuntimeError("CreditoService requiere un CreditoRepository para consultar")
