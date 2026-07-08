@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import get_credito_service, get_current_usuario
-from app.schemas.credito import CreditoCreate, CreditoDetalle
+from app.schemas.credito import CreditoCreate, CreditoDetalle, CreditoOut
 from app.services.credito_service import CreditoService
 
 router = APIRouter(
@@ -18,6 +18,14 @@ def registrar_credito(datos: CreditoCreate, service: Annotated[CreditoService, D
     balón), calcula VAN/TIR/TCEA y persiste todo en una sola operación
     (sección 8 del informe: 'Guardar operación dentro de la base de datos')."""
     return service.registrar_credito(datos)
+
+
+@router.get("", response_model=list[CreditoOut])
+def listar_creditos(service: Annotated[CreditoService, Depends(get_credito_service)]):
+    """Lista todos los créditos vehiculares registrados (sin cronograma ni
+    indicadores detallados; para eso usar GET /creditos/{id}). Alimenta los
+    KPIs "Créditos Activos" y "Monto Total Financiado" del Dashboard."""
+    return service.listar_creditos()
 
 
 @router.get("/{id_credito}", response_model=CreditoDetalle)
